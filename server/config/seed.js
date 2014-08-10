@@ -9,42 +9,47 @@ var Thing = require('../api/thing/thing.model');
 var User = require('../api/user/user.model');
 var WorkStream = require('../api/workStream/workStream.model');
 var Item = require('../api/item/item.model');
+var Q = require('Q');
 
 WorkStream.find({}).remove(function() {
-  WorkStream.create({
+  WorkStream.createQ({
     name: 'Steroids-js'
-  }, function(err, workStream){
-    var steroidsWorkStream = workStream;
+  })
+  .then(function(workStream){
 
     Item.find({}).remove(function() {
+      var ps = [];
+      ps.push(
+        Item.createQ({
+          description: 'Unit test runner can be started for different runtimes',
+          dateTime: new Date(),
+          hours: 0.9,
+          groupHours: 2.2,
+          workstream: workStream
+        }),
+        Item.createQ({
+          description: 'Daily with Petrus',
+          dateTime: new Date(),
+          hours: 0.5,
+          groupHours: 2.2,
+          workstream: workStream
+        })
+      );
 
-      Item.create({
-        description: 'Unit test runner can be started for different runtimes',
-        dateTime: new Date(),
-        hours: 0.9,
-        groupHours: 2.2,
-        workstream: steroidsWorkStream
-      },
-      {
-        description: 'Daily with Petrus',
-        dateTime: new Date(),
-        hours: 0.5,
-        groupHours: 2.2,
-        workstream: steroidsWorkStream
-      }, function(err, newItems){
-
-        steroidsWorkStream.items = newItems;
-        steroidsWorkStream.save(function(err){
-          if(err){
-            console.log('error saving workstream with items');
-          }
+      Q.all(ps).then(function(newItems){
+        console.log('created the new items: ' + newItems);
+        workStream.items = newItems;
+        workStream.saveQ()
+        .then(function(){
+          console.log('workStream saved: ' + newItems);
         });
-
-      });
+      })
+      .done();
 
     });
 
-  });
+  })
+  .done();
 });
 
 

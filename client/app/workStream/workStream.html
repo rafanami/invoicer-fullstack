@@ -3,7 +3,7 @@
 <header class="hero-unit" id="banner">
   <div class="row">
     <div class="col-md-6">
-      <h3>WorkStream - <small>Steroids.JS</small></h3>
+      <h3>WorkStream - <small>{{workStreamCtrl.workStream.name}}</small></h3>
     </div>
     <div class="col-md-6">
       <button type="button" class="btn btn-primary">New WorkStream</button>
@@ -19,16 +19,16 @@
   <h4>Unbilled Hours</h4>
   <hr>
   <table class="table table-striped table-hover">
-    <tr ng-repeat="item in workStreamCtrl.list">
+    <tr ng-repeat="item in workStreamCtrl.items">
       <td>
         <div class="task-description">
-          <div class='read-only-value lead' ng-click="item.edit();" ng-hide="item.editMode">{{item.description}}</div>
-          <div class='editable-value'  ng-show="item.editMode">
+          <div class='read-only-value lead' ng-click="item.ctrl.edit();" ng-hide="item.ctrl.editMode">{{item.description}}</div>
+          <div class='editable-value'  ng-show="item.ctrl.editMode">
             <input type="text" ng-model="item.description"/>
             <div class='pull-right action-buttons'>
-              <button type="button" class="btn btn-danger btn-xs" ng-click="item.cancel();">Cancel</button>
+              <button type="button" class="btn btn-danger btn-xs" ng-click="item.ctrl.cancel();">Cancel</button>
               -
-              <button type="button" class="btn btn-primary btn-xs" ng-click="item.save();">Save</button>
+              <button type="button" class="btn btn-primary btn-xs" ng-click="item.ctrl.save();">Save</button>
             </div>
           </div>
 
@@ -44,8 +44,8 @@
           {{item.hours | HoursFraction}}
         </div>
         <div class="task-edit">
-          <span class="glyphicon glyphicon-edit" ng-click="item.edit();" ></span>
-          <span class="glyphicon glyphicon-remove" ng-click="item.delete();" ></span>
+          <span class="glyphicon glyphicon-edit" ng-click="item.ctrl.edit();" ></span>
+          <span class="glyphicon glyphicon-remove" ng-click="item.ctrl.delete();" ></span>
         </div>
       </td>
     </tr>

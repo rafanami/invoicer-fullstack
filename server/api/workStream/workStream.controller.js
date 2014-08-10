@@ -36,16 +36,28 @@ exports.create = function(req, res) {
 
 // Updates an existing workStream in the DB.
 exports.update = function(req, res) {
-  if(req.body._id) { delete req.body._id; }
-  Workstream.findById(req.params.id, function (err, workStream) {
-    if (err) { return handleError(res, err); }
-    if(!workStream) { return res.send(404); }
-    var updated = _.merge(workStream, req.body);
-    updated.save(function (err) {
-      if (err) { return handleError(res, err); }
-      return res.json(200, workStream);
-    });
-  });
+  if(req.body._id) {
+    delete req.body._id;
+  }
+
+  return Workstream.findByIdQ(req.params.id)
+    .then(function (workStream) {
+      if(!workStream) {
+        return res.send(404);
+      }
+      var updated = _.merge(workStream, req.body);
+      updated.saveQ()
+        .then(function (err) {
+          return res.json(200, workStream);
+        })
+        .fail(function(err){
+          return handleError(res, err);
+        });
+    })
+    .fail(function(err){
+      return handleError(res, err);
+    })
+    .done();
 };
 
 // Deletes a workStream from the DB.

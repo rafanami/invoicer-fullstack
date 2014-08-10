@@ -1,40 +1,51 @@
 'use strict';
 
 angular.module('invoicerApp')
-  .controller('WorkStreamCtrl', function ($scope, $http, socket) {
+  .controller('WorkStreamCtrl', function ($scope, $http, socket, $routeParams) {
 
-    var uri = '/api/workStreams';
+    var uri = '/api/workStreams/';
 
     $scope.workStreamCtrl = {};
-    $scope.workStreamCtrl.list = [];
+    $scope.workStreamCtrl.items = [];
 
     function cleanUp(item){
-      delete item.editMode;
+      var newItem = angular.copy(item);
+      delete newItem.ctrl;
+      return newItem;
     }
 
     function editableItem(item){
-      item.editMode = false;
-      item.edit = function () {
-        item.editMode = true;
+      item.ctrl = {};
+      item.ctrl.editMode = false;
+      item.ctrl.edit = function () {
+        item.ctrl.editMode = true;
       };
-      item.cancel = function () {
-        item.editMode = false;
+      item.ctrl.cancel = function () {
+        item.ctrl.editMode = false;
       };
-      item.save = function () {
-        $http.put(uri + '/' + item._id, cleanUp(item));
-        item.editMode = false;
+      item.ctrl.save = function () {
+        $http.put(uri + '/' + item._id, cleanUp(item))
+        .success(function(){
+          item.ctrl.editMode = false;
+        })
+        .error(function(data, status, headers, config) {
+          item.ctrl.invalid = true;
+        });
+
       };
-      item.delete = function(){
+      item.ctrl.delete = function(){
         $http.delete(uri + '/' + item._id);
       };
       return item;
     }
 
-    $http.get(uri).success(function(list) {
-      $scope.workStreamCtrl.list = list.map(function(item){
+    $http.get(uri + $routeParams.id).success(function(workStream) {
+      $scope.workStreamCtrl.workStream = workStream;
+      $scope.workStreamCtrl.items = workStream.items.map(function(item){
         return editableItem(item);
       });
-      socket.syncUpdates('workStream', $scope.workStreamCtrl.list);
+      socket.syncUpdates('item', $scope.workStreamCtrl.items);
+      socket.syncUpdates('workStream', $scope.workStreamCtrl.workStream);
     });
 
     $scope.addItem = function() {
@@ -46,6 +57,7 @@ angular.module('invoicerApp')
     };
 
     $scope.$on('$destroy', function () {
+      socket.unsyncUpdates('item');
       socket.unsyncUpdates('workStream');
     });
 

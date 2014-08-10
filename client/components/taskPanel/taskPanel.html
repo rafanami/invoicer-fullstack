@@ -1,0 +1,13 @@
+<form class="navbar-form navbar-right">
+  <div class="form-group">
+    <input type="text" ng-model="task.name" class="form-control" placeholder="Task Name">
+    <div class="hoursDisplay" ng-if=" ! task.editHour">{{task.time}}<small>:{{task.seconds}}</small></div>
+    <input ng-if="task.editHour" ng-modal="task.time" class="form-control hours" placeholder="Hours">
+  </div>
+  <button ng-show="task.started" ng-click="task.stop()" class="btn btn-default">
+    <span  class="glyphicon glyphicon-stop"></span>
+  </button>
+  <button ng-hide="task.started" ng-click="task.start()" class="btn btn-default">
+    <span class="glyphicon glyphicon-play"></span>
+  </button>
+</form>

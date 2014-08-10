@@ -15,6 +15,8 @@ angular.module('invoicerApp')
     }
 
     function editableItem(item){
+      var uri = '/api/items/';
+
       item.ctrl = {};
       item.ctrl.editMode = false;
       item.ctrl.edit = function () {
@@ -31,7 +33,6 @@ angular.module('invoicerApp')
         .error(function(data, status, headers, config) {
           item.ctrl.invalid = true;
         });
-
       };
       item.ctrl.delete = function(){
         $http.delete(uri + '/' + item._id);

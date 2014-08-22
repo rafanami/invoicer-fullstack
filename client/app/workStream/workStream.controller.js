@@ -30,7 +30,7 @@ angular.module('invoicerApp')
         .success(function(){
           item.ctrl.editMode = false;
         })
-        .error(function(data, status, headers, config) {
+        .error(function() { //data, status, headers, config
           item.ctrl.invalid = true;
         });
       };

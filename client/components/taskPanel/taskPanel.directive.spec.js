@@ -12,10 +12,27 @@ describe('Directive: taskPanel', function () {
     scope = $rootScope.$new();
   }));
 
-  it('should make hidden element visible', inject(function ($compile) {
+  it('should start timer with 0:00:00', inject(function ($compile) {
     element = angular.element('<task-panel></task-panel>');
     element = $compile(element)(scope);
     scope.$apply();
-    //expect(element.text()).toBe('this is the taskPanel directive');
+    expect(element.find('.hoursDisplay').text()).toBe('0:00:00');
   }));
+
+  it('should after a second be 0:00:01', function(done){
+
+    inject(function ($compile) {
+      element = angular.element('<task-panel></task-panel>');
+      element = $compile(element)(scope);
+      scope.$apply();
+
+      angular.element(element.find('button')[0]).click();
+
+      expect(element.find('.hoursDisplay').text()).toBe('0:00:00');
+
+      done();
+
+    });
+  });
+
 });

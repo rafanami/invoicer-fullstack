@@ -72,6 +72,7 @@ module.exports = function (grunt) {
       },
       jsTest: {
         files: [
+          '<%= yeoman.client %>/{app,components}/**/*.js',
           '<%= yeoman.client %>/{app,components}/**/*.spec.js',
           '<%= yeoman.client %>/{app,components}/**/*.mock.js'
         ],

@@ -17,10 +17,10 @@ angular.module('invoicerApp')
     $scope.isAdmin = Auth.isAdmin;
     $scope.getCurrentUser = Auth.getCurrentUser;
 
-    $http.get("/api/workStreams").success(function(workStreams) {
+    $http.get('/api/workStreams').success(function(workStreams) {
       $scope.workStreams = workStreams.map(function(item){
         return {
-          url: "/workStream/" + item._id,
+          url: '/workStream/' + item._id,
           title: item.name
         };
       });

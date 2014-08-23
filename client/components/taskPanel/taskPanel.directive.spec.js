@@ -6,10 +6,15 @@ describe('Directive: taskPanel', function () {
   beforeEach(module('invoicerApp'));
   beforeEach(module('components/taskPanel/taskPanel.html'));
 
-  var element, scope;
+  var element, scope, httpBackend;
 
-  beforeEach(inject(function ($rootScope) {
+  beforeEach(inject(function ($rootScope, $httpBackend) {
     scope = $rootScope.$new();
+    httpBackend = $httpBackend;
+
+    httpBackend.whenGET('/api/workStreams')
+      .respond([{_id:100, name:'workstream 01'}]);
+
   }));
 
   function start(){
@@ -36,97 +41,121 @@ describe('Directive: taskPanel', function () {
     expect(element.find('.hoursDisplay').text()).toBe(value);
   }
 
-  it('should start timer with 0:00:00', inject(function ($compile) {
-    build();
+  describe('Compact Task Panel', function () {
 
-    assertDisplay('0:00:00');
-  }));
+    it('should start timer with 0:00:00', inject(function ($compile) {
+      build();
 
-  it('should be 0:00:01 after a second', function(done){
+      assertDisplay('0:00:00');
+    }));
+
+    it('should be 0:00:01 after a second', function(done){
+
+        build();
+
+        start();
+
+        setTimeout(function(){
+
+          assertDisplay('0:00:01');
+
+          done();
+        }, 1100);
+
+    });
+
+    it('should be 0:10:00 after 10 minutes', function(){
+
+      Timecop.install();
 
       build();
 
       start();
 
-      setTimeout(function(){
+      //travel 10 min into the future
+      Timecop.travel(moment().add(10, 'm').toDate());
 
-        assertDisplay('0:00:01');
+      stop();
 
-        done();
-      }, 1100);
+      assertDisplay('0:10:00');
 
+      Timecop.uninstall();
+    });
+
+    it('should be 1:59:59', function(){
+
+      Timecop.install();
+
+      build();
+
+      start();
+
+      //travel into the future
+      Timecop.travel(moment()
+        .add(1, 'h')
+        .add(59, 'm')
+        .add(59, 's')
+        .toDate());
+
+      stop();
+
+      assertDisplay('1:59:59');
+
+      Timecop.uninstall();
+    });
+
+    it('should calculate time with pause intervals', function(){
+
+      Timecop.install();
+
+      build();
+
+      start();
+
+      //travel into the future
+      Timecop.travel(moment()
+        .add(15, 'm')
+        .add(30, 's')
+        .toDate());
+
+      stop();
+
+      assertDisplay('0:15:30');
+
+      start();
+
+      //travel into the future
+      Timecop.travel(moment()
+        .add(5, 'm')
+        .toDate());
+
+      stop();
+
+      assertDisplay('0:20:30');
+
+      Timecop.uninstall();
+    });
   });
 
-  it('should be 0:10:00 after 10 minutes', function(){
+  describe('Edit Task Modal', function () {
+    function openModal(){
+      httpBackend.expectGET('/api/workStreams');
 
-    Timecop.install();
+      angular.element(element.find('#open_task_modal')[0]).click();
+      scope.$apply();
 
-    build();
+      httpBackend.flush();
+    }
 
-    start();
+    it('should open modal', function(){
 
-    //travel 10 min into the future
-    Timecop.travel(moment().add(10, 'm').toDate());
+      build();
 
-    stop();
+      openModal();
 
-    assertDisplay('0:10:00');
-
-    Timecop.uninstall();
+    });
   });
 
-  it('should be 1:59:59', function(){
-
-    Timecop.install();
-
-    build();
-
-    start();
-
-    //travel into the future
-    Timecop.travel(moment()
-      .add(1, 'h')
-      .add(59, 'm')
-      .add(59, 's')
-      .toDate());
-
-    stop();
-
-    assertDisplay('1:59:59');
-
-    Timecop.uninstall();
-  });
-
-  it('should calculate time with pause intervals', function(){
-
-    Timecop.install();
-
-    build();
-
-    start();
-
-    //travel into the future
-    Timecop.travel(moment()
-      .add(15, 'm')
-      .add(30, 's')
-      .toDate());
-
-    stop();
-
-    assertDisplay('0:15:30');
-
-    start();
-
-    //travel into the future
-    Timecop.travel(moment()
-      .add(5, 'm')
-      .toDate());
-
-    stop();
-
-    assertDisplay('0:20:30');
-
-    Timecop.uninstall();
-  });
+  
 
 });

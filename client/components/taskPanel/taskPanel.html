@@ -31,9 +31,16 @@
           </div>
           <div class="col-md-6">
             <div class="form-group">
-              <label for="taskName">Date : </label>
+              <label for="taskDate">Date : </label>
               <div class="input-group">
-                <input type="text" class="form-control" datepicker-popup="dd/MM/yyyy" ng-model="task.date" is-open="calendarOpened" datepicker-options="dateOptions" ng-required="true" close-text="Close" />
+                <input id="taskDate" type="text"
+                  class="form-control"
+                  datepicker-popup="dd/MM/yyyy"
+                  ng-model="task.date"
+                  is-open="calendarOpened"
+                  datepicker-options="dateOptions"
+                  ng-required="true"
+                  close-text="Close" />
                 <span class="input-group-btn">
                   <a class="btn btn-default" ng-click="openCalendar($event)">
                     <i class="glyphicon glyphicon-calendar"></i>

@@ -42,7 +42,7 @@ angular.module('invoicerApp')
             scope.task.totalSeconds += (minutes * 60);
             scope.task.totalSeconds += parseInt(scope.task.seconds);
 
-            resetStartTime();
+            adjustMoment();
 
             formatTime();
 
@@ -53,7 +53,7 @@ angular.module('invoicerApp')
           }
         };
 
-        function resetStartTime(){
+        function adjustMoment(){
           scope.task.moment = moment();
           if(scope.task.totalSeconds && scope.task.totalSeconds > 0){
             scope.task.moment.add(-(scope.task.totalSeconds), 's');
@@ -63,7 +63,7 @@ angular.module('invoicerApp')
         scope.task.start = function(){
           scope.task.started = true;
 
-          resetStartTime();
+          adjustMoment();
 
           formatTime();
           tick();

@@ -1,7 +1,8 @@
 'use strict';
 
 angular.module('invoicerApp')
-  .directive('taskPanel', function ($modal, $log, $http) {
+  .directive('taskPanel', function ($modal,
+    $http, localStore, $log) {
     return {
       templateUrl: 'components/taskPanel/taskPanel.html',
       restrict: 'EA',
@@ -130,8 +131,7 @@ angular.module('invoicerApp')
             }
           });
 
-          taskModal.result.then(function (task) {
-            $log.info('save task : ' + task);
+          taskModal.result.then(function () {
 
             saveTask();
 
@@ -165,8 +165,18 @@ angular.module('invoicerApp')
           scope.task.seconds = diff.format('ss');
         }
 
-        function saveTime(){
+        function saveToServer(){
+          
+        }
 
+        //save the current task to local storage
+        function saveTime(){
+          return localStore.save('currentTask', scope.task)
+            .then(saveToServer)
+            .catch(function(err){
+              //error
+              $log.error('Error saving current task: ' + err);
+            });
         }
 
       }

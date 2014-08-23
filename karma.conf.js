@@ -13,6 +13,7 @@ module.exports = function(config) {
     files: [
       'client/bower_components/jquery/dist/jquery.js',
       'client/bower_components/angular/angular.js',
+      'client/bower_components/moment/moment.js',
       'client/bower_components/angular-mocks/angular-mocks.js',
       'client/bower_components/angular-resource/angular-resource.js',
       'client/bower_components/angular-cookies/angular-cookies.js',
@@ -23,6 +24,8 @@ module.exports = function(config) {
       'client/bower_components/angular-socket-io/socket.js',
 
       'node_modules/socket.io/node_modules/socket.io-client/socket.io.js',
+
+      'node_modules/timecop/timecop.js',
 
       'client/app/app.js',
       'client/app/app.coffee',

@@ -1,13 +1,86 @@
 <form class="navbar-form navbar-right">
   <div class="form-group">
     <input type="text" ng-model="task.name" class="form-control" placeholder="Task Name">
-    <div class="hoursDisplay" ng-if=" ! task.editHour">{{task.time}}<small>:{{task.seconds}}</small></div>
-    <input ng-if="task.editHour" ng-modal="task.time" class="form-control hours" placeholder="Hours">
+    <div class="hoursDisplay">{{task.time}}<small>:{{task.seconds}}</small></div>
   </div>
-  <button ng-show="task.started" ng-click="task.stop()" class="btn btn-default">
+  <button id="task_stop" ng-show="task.started" ng-click="task.stop()" class="btn btn-default">
     <span  class="glyphicon glyphicon-stop"></span>
   </button>
-  <button ng-hide="task.started" ng-click="task.start()" class="btn btn-default">
+  <button id="task_start" ng-hide="task.started" ng-click="task.start()" class="btn btn-default">
     <span class="glyphicon glyphicon-play"></span>
   </button>
+  <button id="open_task_modal" ng-click="task.openTaskeModal()" class="btn btn-default">
+    <span class="glyphicon glyphicon-save"></span>
+  </button>
 </form>
+
+<script type="text/ng-template" id="saveTaskModal.html">
+    <form role="form">
+      <div class="modal-header">
+          <h3 class="modal-title">Save Task</h3>
+      </div>
+      <div class="modal-body">
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="workStream">WorkStream : </label>
+              <select class="form-control" ng-model="task.workStream" ng-options="workStream.name for workStream in workStreams">
+              </select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="taskName">Date : </label>
+              <div class="input-group">
+                <input type="text" class="form-control" datepicker-popup="dd/MM/yyyy" ng-model="task.date" is-open="calendarOpened" datepicker-options="dateOptions" ng-required="true" close-text="Close" />
+                <span class="input-group-btn">
+                  <a class="btn btn-default" ng-click="openCalendar($event)">
+                    <i class="glyphicon glyphicon-calendar"></i>
+                  </a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="taskName">Task : </label>
+          <input id="taskName" type="text" ng-model="task.name" class="form-control" placeholder="Task Name">
+        </div>
+        <div class="form-group">
+          <label for="taskTime">Time: </label>
+          <div></div>
+          <div class="hoursDisplay" ng-hide="task.editingTime">{{task.time}}<small>:{{task.seconds}}</small></div>
+          <input id="taskTime" ng-show="task.editingTime" ng-class="{invalid: task.invalidTime}" ng-modal="task.time" class="form-control hours" placeholder="Hours">
+
+          <span ng-hide="task.editingTime">
+            <button id="task_stop" ng-show="task.started" ng-click="task.stop()" class="btn btn-default">
+              <span  class="glyphicon glyphicon-stop"></span>
+            </button>
+
+            <button id="task_start" ng-hide="task.started" ng-click="task.start()" class="btn btn-default">
+              <span class="glyphicon glyphicon-play"></span>
+            </button>
+          </span>
+
+          <button id="edit_time" ng-hide="task.editingTime" ng-click="task.editTime()" class="btn btn-default">
+            <span class="glyphicon glyphicon-edit"></span>
+          </button>
+          <button id="edit_time" ng-show="task.editingTime" ng-click="task.doneEditTime()" class="btn btn-default">
+            <span class="glyphicon glyphicon-check"></span>
+          </button>
+
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-primary" ng-click="saveTask()">
+            Save Task
+            <span  class="glyphicon glyphicon-save"></span>
+          </button>
+          <button class="btn btn-warning" ng-click="cancel()">
+            Cancel
+          </button>
+      </div>
+    </form>
+</script>

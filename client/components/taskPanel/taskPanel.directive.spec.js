@@ -12,27 +12,121 @@ describe('Directive: taskPanel', function () {
     scope = $rootScope.$new();
   }));
 
-  it('should start timer with 0:00:00', inject(function ($compile) {
-    element = angular.element('<task-panel></task-panel>');
-    element = $compile(element)(scope);
+  function start(){
+    angular.element(element.find('#task_start')[0]).click();
     scope.$apply();
-    expect(element.find('.hoursDisplay').text()).toBe('0:00:00');
-  }));
+  }
 
-  it('should after a second be 0:00:01', function(done){
+  function stop(){
+    angular.element(element.find('#task_stop')[0]).click();
+    scope.$apply();
+  }
 
+  function build(){
     inject(function ($compile) {
       element = angular.element('<task-panel></task-panel>');
       element = $compile(element)(scope);
       scope.$apply();
 
-      angular.element(element.find('button')[0]).click();
-
-      expect(element.find('.hoursDisplay').text()).toBe('0:00:00');
-
-      done();
-
+      assertDisplay('0:00:00');
     });
+  }
+
+  function assertDisplay(value){
+    expect(element.find('.hoursDisplay').text()).toBe(value);
+  }
+
+  it('should start timer with 0:00:00', inject(function ($compile) {
+    build();
+
+    assertDisplay('0:00:00');
+  }));
+
+  it('should be 0:00:01 after a second', function(done){
+
+      build();
+
+      start();
+
+      setTimeout(function(){
+
+        assertDisplay('0:00:01');
+
+        done();
+      }, 1100);
+
+  });
+
+  it('should be 0:10:00 after 10 minutes', function(){
+
+    Timecop.install();
+
+    build();
+
+    start();
+
+    //travel 10 min into the future
+    Timecop.travel(moment().add(10, 'm').toDate());
+
+    stop();
+
+    assertDisplay('0:10:00');
+
+    Timecop.uninstall();
+  });
+
+  it('should be 1:59:59', function(){
+
+    Timecop.install();
+
+    build();
+
+    start();
+
+    //travel into the future
+    Timecop.travel(moment()
+      .add(1, 'h')
+      .add(59, 'm')
+      .add(59, 's')
+      .toDate());
+
+    stop();
+
+    assertDisplay('1:59:59');
+
+    Timecop.uninstall();
+  });
+
+  it('should calculate time with pause intervals', function(){
+
+    Timecop.install();
+
+    build();
+
+    start();
+
+    //travel into the future
+    Timecop.travel(moment()
+      .add(15, 'm')
+      .add(30, 's')
+      .toDate());
+
+    stop();
+
+    assertDisplay('0:15:30');
+
+    start();
+
+    //travel into the future
+    Timecop.travel(moment()
+      .add(5, 'm')
+      .toDate());
+
+    stop();
+
+    assertDisplay('0:20:30');
+
+    Timecop.uninstall();
   });
 
 });

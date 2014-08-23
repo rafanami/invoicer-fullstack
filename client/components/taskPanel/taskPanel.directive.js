@@ -22,44 +22,71 @@ angular.module('invoicerApp')
 
           scope.task.stop();
 
+          scope.task.timeValue = scope.task.time;
         };
 
-        var hourMatch = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        var hourMatch = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
 
         scope.task.doneEditTime = function(){
-          var newTime = hourMatch.exec(scope.task.time);
+          var newTime = hourMatch.exec(scope.task.timeValue);
 
           if(newTime){
             scope.task.editingTime = false;
             scope.task.invalidTime = false;
-            scope.task.time = newTime[0];
+
+            //scope.task.time = newTime[0];
+            var hours = parseInt(newTime[1]),
+                minutes = parseInt(newTime[2]);
+
+            scope.task.totalSeconds = (hours * 60 * 60);
+            scope.task.totalSeconds += (minutes * 60);
+            scope.task.totalSeconds += parseInt(scope.task.seconds);
+
+            resetStartTime();
+
+            formatTime();
+
+            delete scope.task.timeValue;
           }
           else{
             scope.task.invalidTime = true;
           }
         };
 
-        scope.task.start = function(){
-          scope.task.started = true;
-
+        function resetStartTime(){
           scope.task.moment = moment();
-
           if(scope.task.totalSeconds && scope.task.totalSeconds > 0){
             scope.task.moment.add(-(scope.task.totalSeconds), 's');
           }
+        }
+
+        scope.task.start = function(){
+          scope.task.started = true;
+
+          resetStartTime();
 
           formatTime();
           tick();
         };
 
         scope.task.stop = function(){
-          scope.task.started = false;
+          if(scope.task.started){
+            scope.task.started = false;
 
-          formatTime();
+            if(timerRef){
+              clearTimeout(timerRef);
+            }
 
-          scope.task.totalSeconds = moment().unix() - scope.task.moment.unix();
+            if(!scope.task.moment){
+              scope.task.moment = moment();
+            }
 
-          saveTime();
+            formatTime();
+
+            scope.task.totalSeconds = moment().unix() - scope.task.moment.unix();
+
+            saveTime();
+          }
         };
 
         var TaskModalCtrl = function($scope, $modalInstance, task) {

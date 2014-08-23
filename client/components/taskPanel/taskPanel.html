@@ -15,7 +15,7 @@
 </form>
 
 <script type="text/ng-template" id="saveTaskModal.html">
-    <form role="form">
+    <form id="saveTaskModal" role="form">
       <div class="modal-header">
           <h3 class="modal-title">Save Task</h3>
       </div>
@@ -52,7 +52,12 @@
           <label for="taskTime">Time: </label>
           <div></div>
           <div class="hoursDisplay" ng-hide="task.editingTime">{{task.time}}<small>:{{task.seconds}}</small></div>
-          <input id="taskTime" ng-show="task.editingTime" ng-class="{invalid: task.invalidTime}" ng-modal="task.time" class="form-control hours" placeholder="Hours">
+          <input id="taskTime"
+                  ng-model="task.timeValue"
+                  ng-show="task.editingTime"
+                  ng-class="{invalid: task.invalidTime}"
+                  class="form-control hours"
+                  placeholder="Hours">
 
           <span ng-hide="task.editingTime">
             <button id="task_stop" ng-show="task.started" ng-click="task.stop()" class="btn btn-default">

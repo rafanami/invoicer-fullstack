@@ -1,6 +1,6 @@
 'use strict';
 
-var mongoose = require('mongoose-q')(require('mongoose')),
+var mongoose = require('mongoose-bird')(),
     Schema = mongoose.Schema;
 
 var WorkstreamSchema = new Schema({

@@ -3,9 +3,8 @@
 var should = require('should');
 var app = require('../../app');
 var request = require('supertest');
-//var Item = require('./item.model');
-var mongoose = require('mongoose-q')(require('mongoose'));
-var Item = mongoose.model('User');
+var mongoose = require('mongoose-bird')();
+var Item = mongoose.model('Item');
 
 
 describe('Item model', function() {

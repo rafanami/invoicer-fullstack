@@ -36,7 +36,7 @@ describe('workStream model', function() {
 
   it('should begin with no WorkStreams', function(done) {
     WorkStream
-      .findQ({})
+      .findAsync({})
       .then(function (workStreams) {
         workStreams.should.have.length(0);
         done();
@@ -48,7 +48,7 @@ describe('workStream model', function() {
 
     var workStream;
     WorkStream
-      .create({name: 'Test WorkStream'})
+      .createAsync({name: 'Test WorkStream'})
       .then(function(newWorkStream){
         should.exist(newWorkStream);
         newWorkStream.should.have.property('name', 'Test WorkStream');
@@ -69,7 +69,7 @@ describe('workStream model', function() {
         console.log('workStream assigned to item1');
 
         return Item
-          .createQ(item1);
+          .createAsync(item1);
       })
       .then(function(newItem){
         should.exist(newItem);
@@ -78,9 +78,9 @@ describe('workStream model', function() {
         workStream.items = [newItem];
 
         console.log('will additem1 to workStream items');
-        return workStream.saveQ();
+        return workStream.saveAsync();
       })
-      .then(function(newWorkStream){
+      .spread(function(newWorkStream){
         should.exist(newWorkStream);
         newWorkStream.should.have.property('items');
         newWorkStream.items.should.be.instanceof(Array);

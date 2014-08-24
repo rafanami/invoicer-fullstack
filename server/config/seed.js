@@ -9,47 +9,64 @@ var Thing = require('../api/thing/thing.model');
 var User = require('../api/user/user.model');
 var WorkStream = require('../api/workStream/workStream.model');
 var Item = require('../api/item/item.model');
-var Q = require('Q');
+var Promise = require("bluebird");
+
+var workStream, items = [];
+
+function removeAllItems(){
+  return Item.find({}).removeAsync();
+}
+
+function createItem(item){
+  return function(workStream){
+    item.workstream =  workStream;
+    item.dateTime = new Date();
+    return Item.createAsync(item);
+  };
+}
+
+function getWorkStream(_workStream){
+  workStream = _workStream;
+  return workStream;
+}
+
+function getItem(item){
+  items.push(item);
+  return item;
+}
+
+function createWorkStream(){
+  return WorkStream.createAsync({
+    name: 'Steroids-js'
+  });
+}
+
+function mapItemsToWorkStream(){
+  workStream.items = items;
+  return workStream.saveAsync();
+}
+
 
 WorkStream.find({}).remove(function() {
-  WorkStream.createQ({
-    name: 'Steroids-js'
-  })
-  .then(function(workStream){
-
-    Item.find({}).remove(function() {
-      var ps = [];
-      ps.push(
-        Item.createQ({
-          description: 'Unit test runner can be started for different runtimes',
-          dateTime: new Date(),
-          hours: 0.9,
-          groupHours: 2.2,
-          workstream: workStream
-        }),
-        Item.createQ({
-          description: 'Daily with Petrus',
-          dateTime: new Date(),
-          hours: 0.5,
-          groupHours: 2.2,
-          workstream: workStream
-        })
-      );
-
-      Q.all(ps).then(function(newItems){
-        console.log('created the new items: ' + newItems);
-        workStream.items = newItems;
-        workStream.saveQ()
-        .then(function(){
-          console.log('workStream saved: ' + newItems);
-        });
-      })
-      .done();
-
+  Item.find({}).removeAsync()
+    .then(createWorkStream)
+    .then(getWorkStream)
+    .then(createItem({
+      description: 'Unit test runner can be started for different runtimes',
+      hours: 0.9,
+      groupHours: 2.2
+    }))
+    .then(getItem)
+    .then(createItem({
+      description: 'Daily with Petrus',
+      hours: 0.5,
+      groupHours: 2.2
+    }))
+    .then(getItem)
+    .then(mapItemsToWorkStream)
+    .then(function(){
+      console.log('all saved !');
     });
-
-  })
-  .done();
 });
 
 

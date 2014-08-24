@@ -1,8 +1,8 @@
 'use strict';
 
-var mongoose = require('mongoose-q')(require('mongoose')),
+var mongoose = require('mongoose-bird')(),
     Schema = mongoose.Schema,
-    Q = require('Q');
+    Promise = require("bluebird");
 
 var ItemSchema = new Schema({
   description: String,
@@ -33,7 +33,7 @@ ItemSchema
 
       //calculate groupHours
       self.constructor
-        .findQ({description:self.description})
+        .findAsync({description:self.description})
         .then(function(others){
 
           console.log('item pre save -> found # ' + others.length + ' others.');
@@ -52,7 +52,7 @@ ItemSchema
             if( ! item._id.equals( self._id ) ){
               item.groupHours = groupHours;
               item.groupHoursUpdateState = GROUP_HOURS_BEING_UPDATED;
-              return item.saveQ().done();
+              return item.saveAsync().done();
             }
           });
 
@@ -60,17 +60,16 @@ ItemSchema
 
           self.groupHours = groupHours;
 
-          return Q.all(promises);
+          return Promise.all(promises);
         })
         .then(function(){
           console.log('item pre save -> all done :-)');
           next();
         })
-        .fail(function(err){
+        .catch(function(err){
           console.log('ERROR: Item pre save: ' + err);
           next(new Error('Could not calculate groupHours'));
-        })
-        .done();
+        });
       }
       else{
         console.log('item pre save -> for ' + self._id + ' WILL NOT update groupHours ');

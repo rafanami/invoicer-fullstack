@@ -24,8 +24,8 @@
     "connect-mongo": "^0.4.1",
     "socket.io": "~1.0.6",
     "socketio-jwt": "^2.0.2",
-    "mongoose-q": "0.0.10",
-    "q": "~1.0.0"
+    "mongoose-bird": "latest",
+    "bluebird": "~2.3.1"
   },
   "devDependencies": {
     "grunt": "~0.4.4",

@@ -1,6 +1,6 @@
 'use strict';
 
-var mongoose = require('mongoose');
+var mongoose = require('mongoose-bird')();
 var passport = require('passport');
 var config = require('../config/environment');
 var jwt = require('jsonwebtoken');

@@ -25,7 +25,9 @@
     "socket.io": "~1.0.6",
     "socketio-jwt": "^2.0.2",
     "mongoose-bird": "latest",
-    "bluebird": "~2.3.1"
+    "bluebird": "~2.3.1",
+    "chai": "latest",
+    "chai-as-promised": "latest"
   },
   "devDependencies": {
     "grunt": "~0.4.4",

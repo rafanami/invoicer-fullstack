@@ -18,6 +18,7 @@ function onConnect(socket) {
   });
 
   // Insert sockets below
+  require('../api/currentTask/currentTask.socket').register(socket);
   require('../api/item/item.socket').register(socket);
   require('../api/workStream/workStream.socket').register(socket);
   require('../api/thing/thing.socket').register(socket);

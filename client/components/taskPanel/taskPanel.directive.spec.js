@@ -23,6 +23,8 @@ describe('Directive: taskPanel', function () {
   }
 
   function stop(){
+    expectRequest();
+
     angular.element(element.find('#task_stop')[0]).click();
     scope.$apply();
   }
@@ -41,6 +43,13 @@ describe('Directive: taskPanel', function () {
     expect(element.find('.hoursDisplay').text()).toBe(value);
   }
 
+  function expectRequest(){
+
+    httpBackend.expectPOST('/api/currentTask/')
+      .respond([{_id:100, name:'task xyz'}]);
+
+  }
+
   describe('Compact Task Panel', function () {
 
     it('should start timer with 0:00:00', inject(function ($compile) {
@@ -52,6 +61,8 @@ describe('Directive: taskPanel', function () {
     it('should be 0:00:01 after a second', function(done){
 
         build();
+
+        expectRequest();
 
         start();
 
@@ -156,6 +167,6 @@ describe('Directive: taskPanel', function () {
     });
   });
 
-  
+
 
 });

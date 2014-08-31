@@ -18,6 +18,8 @@ angular.module('invoicerApp')
           date: new Date()
         };
 
+        loadTaskFromServer();
+
         scope.task.editTime = function(){
           scope.task.editingTime = true;
 
@@ -35,7 +37,6 @@ angular.module('invoicerApp')
             scope.task.editingTime = false;
             scope.task.invalidTime = false;
 
-            //scope.task.time = newTime[0];
             var hours = parseInt(newTime[1]),
                 minutes = parseInt(newTime[2]);
 
@@ -47,7 +48,7 @@ angular.module('invoicerApp')
 
             formatTime();
 
-            delete scope.task.timeValue;
+            scope.task.timeValue = null;
           }
           else{
             scope.task.invalidTime = true;
@@ -165,8 +166,41 @@ angular.module('invoicerApp')
           scope.task.seconds = diff.format('ss');
         }
 
+
+        var url = '/api/currentTask/';
+
+        function loadTaskFromServer(){
+          $http.get(url)
+            .success(function(addedTask){
+              scope.task.id = addedTask._id;
+            })
+            .error(function() {
+              $log.debug('could not save task');
+            });
+        }
+
         function saveToServer(){
-          
+          var objToSave = {
+            name: scope.task.name,
+            totalSeconds: scope.task.totalSeconds,
+            date: scope.task.date
+          };
+
+          if(scope.task.id){
+            return $http.put(url + scope.task.id, objToSave)
+            .error(function() {
+              $log.debug('could not save task');
+            });
+          }
+          else{
+            return $http.post(url, objToSave)
+              .success(function(addedTask){
+                scope.task.id = addedTask._id;
+              })
+              .error(function() {
+                $log.debug('could not save task');
+              });
+          }
         }
 
         //save the current task to local storage

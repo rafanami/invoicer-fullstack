@@ -571,8 +571,7 @@ module.exports = function (grunt) {
       return grunt.task.run([
         'env:all',
         'env:test',
-        'mochaTest',
-        'watch:mochaTest'
+        'mochaTest'
       ]);
     }
 

@@ -2,7 +2,7 @@
 
 angular.module('invoicerApp')
   .directive('taskPanel', function ($modal,
-    $http, localStore, $log) {
+    $http, localStore, $log, Auth) {
     return {
       templateUrl: 'components/taskPanel/taskPanel.html',
       restrict: 'EA',
@@ -15,8 +15,21 @@ angular.module('invoicerApp')
           seconds:'00',
           totalSeconds:0,
           moment:null,
-          date: new Date()
+          date: new Date(),
+          userId: Auth.getCurrentUser()._id
         };
+
+        var url = '/api/currentTask/';
+
+        function loadTaskFromServer(){
+          $http.get(url + 'findOne?userId=' + scope.task.userId)
+            .success(function(currentTask){
+              scope.task.id = currentTask._id;
+            })
+            .error(function() {
+              $log.debug('could not find task for user');
+            });
+        }
 
         loadTaskFromServer();
 
@@ -164,19 +177,6 @@ angular.module('invoicerApp')
           var diff = moment().subtract(scope.task.moment);
           scope.task.time = diff.format('H:mm');
           scope.task.seconds = diff.format('ss');
-        }
-
-
-        var url = '/api/currentTask/';
-
-        function loadTaskFromServer(){
-          $http.get(url)
-            .success(function(addedTask){
-              scope.task.id = addedTask._id;
-            })
-            .error(function() {
-              $log.debug('could not save task');
-            });
         }
 
         function saveToServer(){

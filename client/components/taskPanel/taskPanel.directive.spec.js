@@ -6,16 +6,40 @@ describe('Directive: taskPanel', function () {
   beforeEach(module('invoicerApp'));
   beforeEach(module('components/taskPanel/taskPanel.html'));
 
-  var element, scope, httpBackend;
+  var element, scope, httpBackend,
+    userId = '1234567890',
+    Auth;
 
-  beforeEach(inject(function ($rootScope, $httpBackend) {
+  beforeEach(inject(function ($rootScope, $httpBackend, _Auth_) {
     scope = $rootScope.$new();
     httpBackend = $httpBackend;
+    Auth = _Auth_;
+
+    Auth.getCurrentUser = function(){
+      return {_id:userId};
+    }
 
     httpBackend.whenGET('/api/workStreams')
       .respond([{_id:100, name:'workstream 01'}]);
 
   }));
+
+  function expectSaveRequest(){
+    httpBackend.expectPOST('/api/currentTask/')
+      .respond([{_id:100, name:'task xyz'}]);
+  }
+
+  function expectFindRequest(withSavedTask){
+
+    if(withSavedTask){
+      httpBackend.expectGET('/api/currentTask/findOne?userId=' + userId)
+        .respond([{_id:200, name:'saved task', userId:userId}]);
+    }
+    else{
+      //TODO: I need to respond with an error here..
+      //so the directive does not load a previous task.
+    }
+  }
 
   function start(){
     angular.element(element.find('#task_start')[0]).click();
@@ -23,7 +47,7 @@ describe('Directive: taskPanel', function () {
   }
 
   function stop(){
-    expectRequest();
+    expectSaveRequest();
 
     angular.element(element.find('#task_stop')[0]).click();
     scope.$apply();
@@ -31,6 +55,9 @@ describe('Directive: taskPanel', function () {
 
   function build(){
     inject(function ($compile) {
+
+      expectFindRequest();
+
       element = angular.element('<task-panel></task-panel>');
       element = $compile(element)(scope);
       scope.$apply();
@@ -41,13 +68,6 @@ describe('Directive: taskPanel', function () {
 
   function assertDisplay(value){
     expect(element.find('.hoursDisplay').text()).toBe(value);
-  }
-
-  function expectRequest(){
-
-    httpBackend.expectPOST('/api/currentTask/')
-      .respond([{_id:100, name:'task xyz'}]);
-
   }
 
   describe('Compact Task Panel', function () {
@@ -62,7 +82,7 @@ describe('Directive: taskPanel', function () {
 
         build();
 
-        expectRequest();
+        expectSaveRequest();
 
         start();
 

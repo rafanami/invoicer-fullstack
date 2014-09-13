@@ -87,7 +87,7 @@
       </div>
       <div class="modal-footer">
           <span ng-show="saveTaskModal.$dirty && saveTaskModal.$invalid" class='pull-left validation-error-msg'>Provide all required information ! </span>
-          <button class="btn btn-primary" ng-click="saveTask()">
+          <button class="btn btn-primary" ng-click="saveTask(saveTaskModal)">
             Save Task
             <span  class="glyphicon glyphicon-save"></span>
           </button>

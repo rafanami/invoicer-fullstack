@@ -21,17 +21,27 @@ angular.module('invoicerApp')
 
         var url = '/api/currentTask/';
 
-        function loadTaskFromServer(){
+        function restoreTaskFromServer(currentTask){
+          scope.task.id = currentTask._id;
+          $log.debug('task restored from server -> currentTask: ', currentTask);
+        }
 
+        function restoreTaskFromLocalStore(storedTask){
+          scope.task = storedTask;
+          $log.debug('task restored from localStore -> storedTask: ', storedTask);
+        }
+
+        function loadTaskFromServer(){
           $log.debug('load current task for user', scope.task.userId);
 
           $http.get(url + 'findOne?userId=' + scope.task.userId)
-            .success(function(currentTask){
-              scope.task.id = currentTask._id;
-              $log.debug('current task found -> currentTask: ', currentTask);
-            })
-            .error(function(err) {
-              $log.debug('could not find task for user', err);
+            .success(restoreTaskFromServer)
+            .error(function() {
+              $log.debug('could not find current task for user, will try to recover from localStore');
+
+              localStore.load('currentTask')
+                .then(restoreTaskFromLocalStore);
+
             });
         }
 
@@ -159,8 +169,10 @@ angular.module('invoicerApp')
           });
         };
 
-        function saveTask(){
+        function saveTask(form){
+          if( ! form.$invalid){
 
+          }
         }
 
         var timerRef = null;

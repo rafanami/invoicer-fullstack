@@ -8,13 +8,14 @@ describe('Directive: taskPanel', function () {
 
   var element, scope, httpBackend,
     userId = '1234567890',
-    Auth, $log;
+    Auth, $log, localStore;
 
-  beforeEach(inject(function ($rootScope, $httpBackend, _Auth_, _$log_) {
+  beforeEach(inject(function ($rootScope, $httpBackend, _Auth_, _$log_, _localStore_) {
     scope = $rootScope.$new();
     httpBackend = $httpBackend;
     Auth = _Auth_;
     $log = _$log_;
+    localStore = _localStore_;
 
     Auth.getCurrentUser = function(){
       return {_id:userId};
@@ -23,6 +24,7 @@ describe('Directive: taskPanel', function () {
     httpBackend.whenGET('/api/workStreams')
       .respond([{_id:100, name:'workstream 01'}]);
 
+    delete localStorage.currentTask;
   }));
 
   beforeEach(function(){
@@ -119,10 +121,31 @@ describe('Directive: taskPanel', function () {
       expect(scope.task.id).toBeFalsy();
     });
 
-    it('should load an existing current task', function () {
+    it('should load an existing current task from server', function () {
       build(true);
 
       expect(scope.task.id).toBe(87654);
+    });
+
+    it('should load the task from localStore when the server calls fails', function () {
+
+      localStore.setItem('currentTask', {
+        name:'saved on localStore',
+        editHour:false,
+        started:false,
+        time:'1:20',
+        seconds:'35',
+        totalSeconds:0,
+        date: new Date(),
+        userId: userId
+      });
+
+      build();
+
+      expect(scope.task.name).toBe('saved on localStore');
+      expect(scope.task.time).toBe('1:20');
+      expect(scope.task.seconds).toBe('35');
+
     });
 
     it('should be 0:00:01 after a second', function(done){

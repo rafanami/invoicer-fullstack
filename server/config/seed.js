@@ -52,13 +52,13 @@ WorkStream.find({}).remove(function() {
     .then(createWorkStream)
     .then(getWorkStream)
     .then(createItem({
-      description: 'Unit test runner can be started for different runtimes',
+      name: 'Unit test runner can be started for different runtimes',
       hours: 0.9,
       groupHours: 2.2
     }))
     .then(getItem)
     .then(createItem({
-      description: 'Daily with Petrus',
+      name: 'Daily with Petrus',
       hours: 0.5,
       groupHours: 2.2
     }))

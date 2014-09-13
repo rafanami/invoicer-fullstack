@@ -55,12 +55,25 @@ function removeEntity(res){
 
 // Get list of items
 exports.index = function(req, res) {
-  
-  
   Item.findAsync()
     .then(responseWithResult(res))
     .catch(handleError(res));
-  
+};
+
+exports.findOne = function(req, res) {
+  Item.findOne(req.query)
+    .execAsync()
+    .then(handleEntityNotFound(res))
+    .then(responseWithResult(res))
+    .catch(handleError(res));
+};
+
+exports.find = function(req, res) {
+  Item.find(req.query)
+    .execAsync()
+    .then(handleEntityNotFound(res))
+    .then(responseWithResult(res))
+    .catch(handleError(res));
 };
 
 // Get a single item
@@ -97,5 +110,3 @@ exports.destroy = function(req, res) {
     .then(removeEntity(res))
     .catch(handleError(res));
 };
-
-

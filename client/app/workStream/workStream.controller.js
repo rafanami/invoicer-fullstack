@@ -42,9 +42,14 @@ angular.module('invoicerApp')
 
     $http.get(uri + $routeParams.id).success(function(workStream) {
       $scope.workStreamCtrl.workStream = workStream;
-      $scope.workStreamCtrl.items = workStream.items.map(function(item){
-        return editableItem(item);
-      });
+
+      $http.get('/api/items/find?workstream=' + workStream._id)
+        .success(function(items) {
+          $scope.workStreamCtrl.items = items.map(function(item){
+            return editableItem(item);
+          });
+        });
+
       socket.syncUpdates('item', $scope.workStreamCtrl.items);
       socket.syncUpdates('workStream', $scope.workStreamCtrl.workStream);
     });

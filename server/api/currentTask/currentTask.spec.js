@@ -19,7 +19,7 @@ describe('currentTask API', function() {
 
   describe('currentTask Model', function() {
 
-    it('should return one item using findOne', function(done) {
+    it('should return one item using findOne by name', function(done) {
 
       CurrentTask
         .createAsync({name:'test_task'})
@@ -34,6 +34,30 @@ describe('currentTask API', function() {
               done();
             });
 
+        });
+
+    });
+
+    it('should return one item using findOne by userId', function(done) {
+
+      var userId = new mongoose.Types.ObjectId(),
+          strUserId = userId.toString();
+
+
+      CurrentTask
+        .createAsync({name:'test_task', userId:userId})
+        .then(function(){
+
+          CurrentTask.findOne({userId:strUserId})
+            .execAsync()
+            .then(function(taskFound){
+              taskFound.should.not.be.null;
+              taskFound.name.should.equal('test_task');
+              taskFound.userId.should.not.be.null;
+              taskFound.userId.toString().should.equal(strUserId);
+
+              done();
+            });
         });
 
     });

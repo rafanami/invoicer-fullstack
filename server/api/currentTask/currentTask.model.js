@@ -7,6 +7,7 @@ var CurrenttaskSchema = new Schema({
   name: String,
   totalSeconds:Number,
   date: Date,
+  started: Boolean,
   userId: Schema.Types.ObjectId
 });
 

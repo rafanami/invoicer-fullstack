@@ -24,7 +24,7 @@ describe('Directive: taskPanel', function () {
     httpBackend.whenGET('/api/workStreams')
       .respond([{_id:100, name:'workstream 01'}]);
 
-    delete localStorage.currentTask;
+    delete localStorage['currentTask_user_' + userId];
   }));
 
   beforeEach(function(){
@@ -59,19 +59,19 @@ describe('Directive: taskPanel', function () {
   });
 
   function expectSaveRequest(){
-    httpBackend.expectPOST('/api/currentTask/')
+    httpBackend.expectPOST('/api/currentTasks')
       .respond([{_id:100, name:'task xyz'}]);
   }
 
   function expectFindRequest(withSavedTask){
     if(withSavedTask){
-      httpBackend.expectGET('/api/currentTask/findOne?userId=' + userId)
+      httpBackend.expectGET('/api/currentTasks/findOne?userId=' + userId)
         .respond(200, {_id:87654, name:'saved task', userId:userId});
     }
     else{
       //Respond with an error here..
       //so the directive does not load a previous task.
-      httpBackend.expectGET('/api/currentTask/findOne?userId=' + userId)
+      httpBackend.expectGET('/api/currentTasks/findOne?userId=' + userId)
         .respond(404, '');
     }
   }
@@ -129,7 +129,7 @@ describe('Directive: taskPanel', function () {
 
     it('should load the task from localStore when the server calls fails', function () {
 
-      localStore.setItem('currentTask', {
+      localStore.setItem('currentTask_user_' + userId, {
         name:'saved on localStore',
         editHour:false,
         started:false,

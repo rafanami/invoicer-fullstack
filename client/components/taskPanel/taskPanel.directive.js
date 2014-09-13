@@ -8,28 +8,40 @@ angular.module('invoicerApp')
       restrict: 'EA',
       link: function (scope) {
 
-        var url = '/api/currentTask/';
+        var url = '/api/currentTasks';
+        var timerRef = null;
 
         scope.task = {};
 
         function resetTask(){
-          scope.task = {
-            name:'',
-            editHour:false,
-            started:false,
-            time:'0:00',
-            seconds:'00',
-            totalSeconds:0,
-            moment:null,
-            date: new Date(),
-            userId: Auth.getCurrentUser()._id
-          };
+          scope.task.id = null;
+          scope.task.name = '';
+          scope.task.totalSeconds = 0;
+          scope.task.userId = Auth.getCurrentUser()._id;
+          scope.task.date = new Date();
+          scope.task.started = false;
+          scope.task.editHour = false;
+          scope.task.time = '0:00';
+          scope.task.seconds = '00';
+          scope.task.moment = null;
         }
 
         resetTask();
 
         function restoreTaskFromServer(currentTask){
           scope.task.id = currentTask._id;
+          scope.task.name = currentTask.name;
+          scope.task.totalSeconds = currentTask.totalSeconds;
+          scope.task.userId = currentTask.userId;
+          scope.task.date = moment(currentTask.date).toDate();
+          scope.task.started = currentTask.started;
+          adjustMoment();
+          formatTime();
+
+          if(scope.task.started){
+            scope.task.start();
+          }
+
           $log.debug('task restored from server -> currentTask: ', currentTask);
         }
 
@@ -55,12 +67,12 @@ angular.module('invoicerApp')
         function loadTaskFromServer(){
           $log.debug('load current task for user', scope.task.userId);
 
-          $http.get(url + 'findOne?userId=' + scope.task.userId)
+          $http.get(url + '/findOne?userId=' + scope.task.userId)
             .success(restoreTaskFromServer)
             .error(function() {
               $log.debug('could not find current task for user, will try to recover from localStore');
 
-              localStore.load('currentTask')
+              localStore.load(currentTaskKey())
                 .then(restoreTaskFromLocalStore);
 
             });
@@ -133,16 +145,16 @@ angular.module('invoicerApp')
 
             formatTime();
 
-            scope.task.totalSeconds = moment().unix() - scope.task.moment.unix();
-
             saveTime();
           }
         };
 
         var TaskModalCtrl = function($scope, $modalInstance, task) {
           $scope.task = task;
-          $scope.saveTask = function () {
-            $modalInstance.close($scope.task);
+          $scope.saveTask = function (form) {
+            if( ! form.$invalid){
+              $modalInstance.close($scope.task);
+            }
           };
 
           $scope.cancel = function () {
@@ -182,7 +194,7 @@ angular.module('invoicerApp')
 
           taskModal.result
             .then(function () {
-              saveTask();
+              saveItem();
             })
             .catch(function () {
               $log.info('Modal dismissed at: ' + new Date());
@@ -193,27 +205,31 @@ angular.module('invoicerApp')
           return seconds / 60 / 60;
         }
 
-        function saveTask(form){
-          if( ! form.$invalid){
+        function saveItem(){
+          scope.task.stop();
 
-            var item = {
-              name: scope.task.name,
-              dateTime: scope.task.date,
-              hours: secondsToHoursFraction(scope.task.totalSeconds),
-              userId: scope.task.userId
-            };
-
-            return $http.post('/api/items', item)
-              .success(function(){
-                resetTask();
-              })
-              .error(function() {
-                $log.debug('could not save new item');
-              });
+          if(scope.task.editingTime){
+            scope.task.doneEditTime();
           }
+
+          var item = {
+            name: scope.task.name,
+            dateTime: scope.task.date,
+            hours: secondsToHoursFraction(scope.task.totalSeconds),
+            userId: scope.task.userId,
+            workstream: scope.task.workStream._id
+          };
+          return $http.post('/api/items', item)
+            .success(function(){
+              $log.debug('Task Item saved !');
+              deleteCurrentTask();
+              resetTask();
+            })
+            .error(function() {
+              $log.debug('could not save new item');
+            });
         }
 
-        var timerRef = null;
         function tick(){
           timerRef = setTimeout(function(){
             formatTime();
@@ -233,15 +249,31 @@ angular.module('invoicerApp')
           scope.task.seconds = diff.format('ss');
         }
 
+        function deleteCurrentTask(){
+          if(scope.task.id){
+            $http.delete(url + '/' + scope.task.id)
+              .catch(function() {
+                $log.debug('could not delete current task from server');
+              });
+          }
+
+          localStore.remove(currentTaskKey())
+            .catch(function() {
+              $log.debug('could not delete current task from localStorage');
+            });
+        }
+
         function saveToServer(){
           var objToSave = {
             name: scope.task.name,
             totalSeconds: scope.task.totalSeconds,
-            date: scope.task.date
+            date: scope.task.date,
+            userId: scope.task.userId,
+            started: scope.task.started
           };
 
           if(scope.task.id){
-            return $http.put(url + scope.task.id, objToSave)
+            return $http.put(url + '/' + scope.task.id, objToSave)
             .error(function() {
               $log.debug('could not update task');
             });
@@ -257,9 +289,18 @@ angular.module('invoicerApp')
           }
         }
 
+        function currentTaskKey(){
+          if(Auth.getCurrentUser()._id){
+            return 'currentTask_user_' + Auth.getCurrentUser()._id;
+          }
+          return null;
+        }
+
         //save the current task to local storage
         function saveTime(){
-          return localStore.save('currentTask', scope.task)
+          scope.task.totalSeconds = moment().unix() - scope.task.moment.unix();
+
+          return localStore.save(currentTaskKey(), scope.task)
             .then(saveToServer)
             .catch(function(err){
               //error

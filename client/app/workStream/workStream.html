@@ -22,9 +22,9 @@
     <tr ng-repeat="item in workStreamCtrl.items">
       <td>
         <div class="task-description">
-          <div class='read-only-value lead' ng-click="item.ctrl.edit();" ng-hide="item.ctrl.editMode">{{item.description}}</div>
+          <div class='read-only-value lead' ng-click="item.ctrl.edit();" ng-hide="item.ctrl.editMode">{{item.name}}</div>
           <div class='editable-value'  ng-show="item.ctrl.editMode">
-            <input type="text" ng-model="item.description"/>
+            <input type="text" ng-model="item.name"/>
             <div class='pull-right action-buttons'>
               <button type="button" class="btn btn-danger btn-xs" ng-click="item.ctrl.cancel();">Cancel</button>
               -

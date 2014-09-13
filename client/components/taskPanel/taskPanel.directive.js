@@ -7,19 +7,26 @@ angular.module('invoicerApp')
       templateUrl: 'components/taskPanel/taskPanel.html',
       restrict: 'EA',
       link: function (scope) {
-        scope.task = {
-          name:'',
-          editHour:false,
-          started:false,
-          time:'0:00',
-          seconds:'00',
-          totalSeconds:0,
-          moment:null,
-          date: new Date(),
-          userId: Auth.getCurrentUser()._id
-        };
 
         var url = '/api/currentTask/';
+
+        scope.task = {};
+
+        function resetTask(){
+          scope.task = {
+            name:'',
+            editHour:false,
+            started:false,
+            time:'0:00',
+            seconds:'00',
+            totalSeconds:0,
+            moment:null,
+            date: new Date(),
+            userId: Auth.getCurrentUser()._id
+          };
+        }
+
+        resetTask();
 
         function restoreTaskFromServer(currentTask){
           scope.task.id = currentTask._id;
@@ -27,7 +34,21 @@ angular.module('invoicerApp')
         }
 
         function restoreTaskFromLocalStore(storedTask){
-          scope.task = storedTask;
+          scope.task.id = storedTask.id;
+          scope.task.name = storedTask.name;
+          scope.task.editHour = storedTask.editHour;
+          scope.task.started = storedTask.started;
+          scope.task.time = storedTask.time;
+          scope.task.seconds = storedTask.seconds;
+          scope.task.totalSeconds = storedTask.totalSeconds;
+          scope.task.moment = moment(storedTask.moment);
+          scope.task.date = moment(storedTask.date).toDate();
+          scope.task.userId = storedTask.userId;
+
+          if(scope.task.started){
+            scope.task.start();
+          }
+
           $log.debug('task restored from localStore -> storedTask: ', storedTask);
         }
 
@@ -159,19 +180,36 @@ angular.module('invoicerApp')
             }
           });
 
-          taskModal.result.then(function () {
-
-            saveTask();
-
-          }, function () {
-            $log.info('Modal dismissed at: ' + new Date());
-
-          });
+          taskModal.result
+            .then(function () {
+              saveTask();
+            })
+            .catch(function () {
+              $log.info('Modal dismissed at: ' + new Date());
+            });
         };
+
+        function secondsToHoursFraction(seconds){
+          return seconds / 60 / 60;
+        }
 
         function saveTask(form){
           if( ! form.$invalid){
 
+            var item = {
+              name: scope.task.name,
+              dateTime: scope.task.date,
+              hours: secondsToHoursFraction(scope.task.totalSeconds),
+              userId: scope.task.userId
+            };
+
+            return $http.post('/api/items', item)
+              .success(function(){
+                resetTask();
+              })
+              .error(function() {
+                $log.debug('could not save new item');
+              });
           }
         }
 

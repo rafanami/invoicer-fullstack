@@ -50,6 +50,10 @@
   padding-left: 20px;
   padding-right: 20px;
 
-//Navbar
-input.form-control.hours
-  width: 80px;
+//Global validation styling
+validation-error-color = red
+input.ng-dirty.ng-invalid-required
+  border 1px solid validation-error-color
+
+.validation-error-msg
+  color validation-error-color

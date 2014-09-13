@@ -33,9 +33,10 @@ function handleEntityNotFound(res){
 function saveUpdates(updates){
   return function(entity){
     var updated = _.merge(entity, updates);
-    return updated.saveAsync(function () {
-      return updated;
-    });
+    return updated.saveAsync()
+      .then(function(){
+        return updated;
+      });
   };
 }
 

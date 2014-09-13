@@ -22,12 +22,16 @@ angular.module('invoicerApp')
         var url = '/api/currentTask/';
 
         function loadTaskFromServer(){
+
+          $log.debug('load current task for user', scope.task.userId);
+
           $http.get(url + 'findOne?userId=' + scope.task.userId)
             .success(function(currentTask){
               scope.task.id = currentTask._id;
+              $log.debug('current task found -> currentTask: ', currentTask);
             })
-            .error(function() {
-              $log.debug('could not find task for user');
+            .error(function(err) {
+              $log.debug('could not find task for user', err);
             });
         }
 
@@ -189,7 +193,7 @@ angular.module('invoicerApp')
           if(scope.task.id){
             return $http.put(url + scope.task.id, objToSave)
             .error(function() {
-              $log.debug('could not save task');
+              $log.debug('could not update task');
             });
           }
           else{
@@ -198,7 +202,7 @@ angular.module('invoicerApp')
                 scope.task.id = addedTask._id;
               })
               .error(function() {
-                $log.debug('could not save task');
+                $log.debug('could not save new task');
               });
           }
         }

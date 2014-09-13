@@ -8,12 +8,13 @@ describe('Directive: taskPanel', function () {
 
   var element, scope, httpBackend,
     userId = '1234567890',
-    Auth;
+    Auth, $log;
 
-  beforeEach(inject(function ($rootScope, $httpBackend, _Auth_) {
+  beforeEach(inject(function ($rootScope, $httpBackend, _Auth_, _$log_) {
     scope = $rootScope.$new();
     httpBackend = $httpBackend;
     Auth = _Auth_;
+    $log = _$log_;
 
     Auth.getCurrentUser = function(){
       return {_id:userId};
@@ -24,20 +25,52 @@ describe('Directive: taskPanel', function () {
 
   }));
 
+  beforeEach(function(){
+    function autoFlush(prop){
+      var original = $log[prop];
+      if(original.AUTO_FLUSH === true){
+        return;
+      }
+
+      $log[prop] = function (msg, param){
+        if(param){
+          original(msg, param);
+          console[prop](msg, param);
+        }
+        else{
+          original(msg);
+          console[prop](msg);
+        }
+      };
+
+      $log[prop].logs = original.logs;
+
+      $log[prop].AUTO_FLUSH = true;
+    }
+
+    autoFlush('debug');
+    autoFlush('log');
+    autoFlush('info');
+    autoFlush('warn');
+    autoFlush('error');
+
+  });
+
   function expectSaveRequest(){
     httpBackend.expectPOST('/api/currentTask/')
       .respond([{_id:100, name:'task xyz'}]);
   }
 
   function expectFindRequest(withSavedTask){
-
     if(withSavedTask){
       httpBackend.expectGET('/api/currentTask/findOne?userId=' + userId)
-        .respond([{_id:200, name:'saved task', userId:userId}]);
+        .respond(200, {_id:87654, name:'saved task', userId:userId});
     }
     else{
-      //TODO: I need to respond with an error here..
+      //Respond with an error here..
       //so the directive does not load a previous task.
+      httpBackend.expectGET('/api/currentTask/findOne?userId=' + userId)
+        .respond(404, '');
     }
   }
 
@@ -53,16 +86,18 @@ describe('Directive: taskPanel', function () {
     scope.$apply();
   }
 
-  function build(){
+  function build(withSavedTask){
     inject(function ($compile) {
 
-      expectFindRequest();
+      expectFindRequest(withSavedTask);
 
       element = angular.element('<task-panel></task-panel>');
       element = $compile(element)(scope);
       scope.$apply();
 
       assertDisplay('0:00:00');
+
+      httpBackend.flush();
     });
   }
 
@@ -72,11 +107,23 @@ describe('Directive: taskPanel', function () {
 
   describe('Compact Task Panel', function () {
 
-    it('should start timer with 0:00:00', inject(function ($compile) {
+    it('should start timer with 0:00:00', function () {
       build();
 
       assertDisplay('0:00:00');
-    }));
+    });
+
+    it('should not load an existing current task', function () {
+      build();
+
+      expect(scope.task.id).toBeFalsy();
+    });
+
+    it('should load an existing current task', function () {
+      build(true);
+
+      expect(scope.task.id).toBe(87654);
+    });
 
     it('should be 0:00:01 after a second', function(done){
 
@@ -91,6 +138,7 @@ describe('Directive: taskPanel', function () {
           assertDisplay('0:00:01');
 
           done();
+
         }, 1100);
 
     });

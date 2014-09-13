@@ -3,21 +3,21 @@
     <input type="text" ng-model="task.name" class="form-control" placeholder="Task Name">
     <div class="hoursDisplay">{{task.time}}<small>:{{task.seconds}}</small></div>
   </div>
-  <button id="task_stop" ng-show="task.started" ng-click="task.stop()" class="btn btn-default">
+  <button id="task_stop" tooltip="Pause timer" tooltip-placement="bottom" ng-show="task.started" ng-click="task.stop()" class="btn btn-default">
     <span  class="glyphicon glyphicon-stop"></span>
   </button>
-  <button id="task_start" ng-hide="task.started" ng-click="task.start()" class="btn btn-default">
+  <button id="task_start" tooltip="Start/Resume timer" tooltip-placement="bottom" ng-hide="task.started" ng-click="task.start()" class="btn btn-default">
     <span class="glyphicon glyphicon-play"></span>
   </button>
-  <button id="open_task_modal" ng-click="task.openTaskeModal()" class="btn btn-default">
+  <button id="open_task_modal" tooltip="Save task" tooltip-placement="bottom" ng-click="task.openTaskeModal()" class="btn btn-default">
     <span class="glyphicon glyphicon-save"></span>
   </button>
 </form>
 
 <script type="text/ng-template" id="saveTaskModal.html">
-    <form id="saveTaskModal" role="form">
+    <form id="saveTaskModal" name="saveTaskModal" role="form" novalidate>
       <div class="modal-header">
-          <h3 class="modal-title">Save Task</h3>
+          <h3 class="modal-title">Save Task: {{task.name}}</h3>
       </div>
       <div class="modal-body">
 
@@ -25,7 +25,7 @@
           <div class="col-md-6">
             <div class="form-group">
               <label for="workStream">WorkStream : </label>
-              <select class="form-control" ng-model="task.workStream" ng-options="workStream.name for workStream in workStreams">
+              <select class="form-control" required ng-model="task.workStream" ng-options="workStream.name for workStream in workStreams">
               </select>
             </div>
           </div>
@@ -33,7 +33,7 @@
             <div class="form-group">
               <label for="taskDate">Date : </label>
               <div class="input-group">
-                <input id="taskDate" type="text"
+                <input id="taskDate" type="text" required
                   class="form-control"
                   datepicker-popup="dd/MM/yyyy"
                   ng-model="task.date"
@@ -53,7 +53,7 @@
 
         <div class="form-group">
           <label for="taskName">Task : </label>
-          <input id="taskName" type="text" ng-model="task.name" class="form-control" placeholder="Task Name">
+          <input id="taskName" type="text" ng-model="task.name" class="form-control" placeholder="Task Name" required>
         </div>
         <div class="form-group">
           <label for="taskTime">Time: </label>
@@ -67,25 +67,26 @@
                   placeholder="Hours">
 
           <span ng-hide="task.editingTime">
-            <button id="task_stop" ng-show="task.started" ng-click="task.stop()" class="btn btn-default">
+            <button id="task_stop" tooltip="Pause timer" ng-show="task.started" ng-click="task.stop()" class="btn btn-default">
               <span  class="glyphicon glyphicon-stop"></span>
             </button>
 
-            <button id="task_start" ng-hide="task.started" ng-click="task.start()" class="btn btn-default">
+            <button id="task_start" tooltip="Start/Resume timer" ng-hide="task.started" ng-click="task.start()" class="btn btn-default">
               <span class="glyphicon glyphicon-play"></span>
             </button>
           </span>
 
-          <button id="edit_time" ng-hide="task.editingTime" ng-click="task.editTime()" class="btn btn-default">
+          <button id="edit_time" tooltip="Edit time" ng-hide="task.editingTime" ng-click="task.editTime()" class="btn btn-default">
             <span class="glyphicon glyphicon-edit"></span>
           </button>
-          <button id="edit_time" ng-show="task.editingTime" ng-click="task.doneEditTime()" class="btn btn-default">
+          <button id="edit_time" tooltip="Save change" ng-show="task.editingTime" ng-click="task.doneEditTime()" class="btn btn-default">
             <span class="glyphicon glyphicon-check"></span>
           </button>
 
         </div>
       </div>
       <div class="modal-footer">
+          <span ng-show="saveTaskModal.$dirty && saveTaskModal.$invalid" class='pull-left validation-error-msg'>Provide all required information ! </span>
           <button class="btn btn-primary" ng-click="saveTask()">
             Save Task
             <span  class="glyphicon glyphicon-save"></span>

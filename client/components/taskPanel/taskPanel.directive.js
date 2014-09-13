@@ -217,7 +217,7 @@ angular.module('invoicerApp')
             dateTime: scope.task.date,
             hours: secondsToHoursFraction(scope.task.totalSeconds),
             userId: scope.task.userId,
-            workstream: scope.task.workStream._id
+            workStream: scope.task.workStream._id
           };
           return $http.post('/api/items', item)
             .success(function(){

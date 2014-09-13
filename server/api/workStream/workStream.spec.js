@@ -5,13 +5,7 @@ var app = require('../../app');
 var request = require('supertest');
 var WorkStream = require('./workStream.model');
 var Item = require('../item/item.model');
-
-
-var item1 = {
-  description: 'Unit test runner can be started for different runtimes',
-  dateTime: new Date(),
-  hours: 0.9
-};
+var Promise = require("bluebird");
 
 describe('workStream model', function() {
 
@@ -44,7 +38,7 @@ describe('workStream model', function() {
       .done();
   });
 
-  it('should add a workStream with an item', function(done) {
+  it('should add a workStream and 2 items', function(done) {
 
     var workStream;
     WorkStream
@@ -64,29 +58,52 @@ describe('workStream model', function() {
         should.exist(workStream);
         workStream.should.have.property('name', 'Test WorkStream');
 
-        item1.workstream = workStream;
+        return Promise.all(
+          [
+            Item.createAsync({
+              name: 'item1',
+              dateTime: new Date(),
+              hours: 0.9,
+              workStream: workStream
+            }),
+            Item.createAsync({
+              name: 'item1',
+              dateTime: new Date(),
+              hours: 2.1,
+              workStream: workStream
+            }),
+            Item.createAsync({
+              name: 'item2',
+              dateTime: new Date(),
+              hours: 4.5,
+              workStream: workStream
+            })
+          ]
+        );
 
-        console.log('workStream assigned to item1');
-
-        return Item
-          .createAsync(item1);
       })
-      .then(function(newItem){
-        should.exist(newItem);
-        newItem.should.have.property('hours', 0.9);
+      .then(function(newItems){
+        should.exist(newItems);
+        newItems.should.be.instanceof(Array);
+        newItems.length.should.be.equal(3);
 
-        workStream.items = [newItem];
 
-        console.log('will additem1 to workStream items');
-        return workStream.saveAsync();
+        console.log('find items related to the workStream');
+        return Item.findAsync({workStream:workStream});
       })
-      .spread(function(newWorkStream){
-        should.exist(newWorkStream);
-        newWorkStream.should.have.property('items');
-        newWorkStream.items.should.be.instanceof(Array);
+      .then(function(itemsByWorkstream){
 
-        console.log('item1 added to workStream items');
+        console.log('items related to the workStream : ', itemsByWorkstream);
+
+        should.exist(itemsByWorkstream);
+        itemsByWorkstream.should.be.instanceof(Array);
+        itemsByWorkstream.length.should.be.equal(3);
+
+        console.log('found items related to the workStream');
         done();
+      })
+      .catch(function(err){
+        console.log('ERROR: ', err);
       });
 
   });

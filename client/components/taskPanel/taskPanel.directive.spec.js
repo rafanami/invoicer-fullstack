@@ -22,7 +22,7 @@ describe('Directive: taskPanel', function () {
     }
 
     httpBackend.whenGET('/api/workStreams')
-      .respond([{_id:100, name:'workstream 01'}]);
+      .respond([{_id:100, name:'workStream 01'}]);
 
     delete localStorage['currentTask_user_' + userId];
   }));

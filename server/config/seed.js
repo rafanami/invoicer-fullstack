@@ -19,7 +19,7 @@ function removeAllItems(){
 
 function createItem(item){
   return function(workStream){
-    item.workstream =  workStream;
+    item.workStream =  workStream;
     item.dateTime = new Date();
     return Item.createAsync(item);
   };
@@ -41,12 +41,6 @@ function createWorkStream(){
   });
 }
 
-function mapItemsToWorkStream(){
-  workStream.items = items;
-  return workStream.saveAsync();
-}
-
-
 WorkStream.find({}).remove(function() {
   Item.find({}).removeAsync()
     .then(createWorkStream)
@@ -63,7 +57,6 @@ WorkStream.find({}).remove(function() {
       groupHours: 2.2
     }))
     .then(getItem)
-    .then(mapItemsToWorkStream)
     .then(function(){
       console.log('all saved !');
     });

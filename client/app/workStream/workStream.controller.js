@@ -43,7 +43,7 @@ angular.module('invoicerApp')
     $http.get(uri + $routeParams.id).success(function(workStream) {
       $scope.workStreamCtrl.workStream = workStream;
 
-      $http.get('/api/items/find?workstream=' + workStream._id)
+      $http.get('/api/items/find?workStream=' + workStream._id)
         .success(function(items) {
           $scope.workStreamCtrl.items = items.map(function(item){
             return editableItem(item);

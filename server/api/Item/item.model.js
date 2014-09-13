@@ -5,12 +5,13 @@ var mongoose = require('mongoose-bird')(),
     Promise = require("bluebird");
 
 var ItemSchema = new Schema({
-  description: String,
+  name: String,
   dateTime: Date,
   hours: Number,
   groupHours: Number,
   groupHoursUpdateState: Number,
   workstream : { type: Schema.Types.ObjectId, ref: 'Workstream' },
+  userId: Schema.Types.ObjectId
 });
 
 
@@ -23,17 +24,17 @@ ItemSchema
 
     var self = this;
 
-    console.log('item pre save -> for id: ' + self._id + ' desc: ' + self.description);
+    console.log('item pre save -> for id: ' + self._id + ' desc: ' + self.name);
 
     if (!self.dateTime) self.dateTime = new Date();
 
     if (self.groupHoursUpdateState !== GROUP_HOURS_BEING_UPDATED){
 
-      console.log('item pre save -> for id: ' + self._id + ' desc: ' + self.description + ' is updating groupHours ');
+      console.log('item pre save -> for id: ' + self._id + ' desc: ' + self.name + ' is updating groupHours ');
 
       //calculate groupHours
       self.constructor
-        .findAsync({description:self.description})
+        .findAsync({name:self.name})
         .then(function(others){
 
           console.log('item pre save -> found # ' + others.length + ' others.');
@@ -41,7 +42,7 @@ ItemSchema
           //calc the groupHours
           var groupHours = self.hours;
           others.forEach(function(item){
-            console.log('item pre save -> other id: ' + item._id + ' desc: ' + item.description + '` hours: ' + item.hours);
+            console.log('item pre save -> other id: ' + item._id + ' desc: ' + item.name + '` hours: ' + item.hours);
             groupHours += item.hours;
           });
 

@@ -7,6 +7,17 @@ var WorkStream = require('./workStream.model');
 var Item = require('../item/item.model');
 var Promise = require("bluebird");
 
+function debug(msg, param){
+  return;
+
+  if(param){
+    console.log('DEBUG : ' + msg, param);
+  }
+  else{
+    console.log('DEBUG : ' + msg);
+  }
+}
+
 describe('workStream model', function() {
 
   before(function(done) {
@@ -17,6 +28,9 @@ describe('workStream model', function() {
     Item.remove().exec().then(function() {
       done();
     });
+
+    //disable
+
   });
 
   afterEach(function(done) {
@@ -47,7 +61,7 @@ describe('workStream model', function() {
         should.exist(newWorkStream);
         newWorkStream.should.have.property('name', 'Test WorkStream');
 
-        console.log('newWorkStream created');
+        debug('newWorkStream created');
 
         return newWorkStream;
       })
@@ -61,19 +75,19 @@ describe('workStream model', function() {
         return Promise.all(
           [
             Item.createAsync({
-              name: 'item1',
+              name: 'workStream_item1',
               dateTime: new Date(),
               hours: 0.9,
               workStream: workStream
             }),
             Item.createAsync({
-              name: 'item1',
+              name: 'workStream_item1',
               dateTime: new Date(),
               hours: 2.1,
               workStream: workStream
             }),
             Item.createAsync({
-              name: 'item2',
+              name: 'workStream_item2',
               dateTime: new Date(),
               hours: 4.5,
               workStream: workStream
@@ -88,22 +102,22 @@ describe('workStream model', function() {
         newItems.length.should.be.equal(3);
 
 
-        console.log('find items related to the workStream');
+        debug('find items related to the workStream');
         return Item.findAsync({workStream:workStream});
       })
       .then(function(itemsByWorkstream){
 
-        console.log('items related to the workStream : ', itemsByWorkstream);
+        debug('items related to the workStream : ', itemsByWorkstream);
 
         should.exist(itemsByWorkstream);
         itemsByWorkstream.should.be.instanceof(Array);
         itemsByWorkstream.length.should.be.equal(3);
 
-        console.log('found items related to the workStream');
+        debug('found items related to the workStream');
         done();
       })
       .catch(function(err){
-        console.log('ERROR: ', err);
+        debug('ERROR: ', err);
       });
 
   });

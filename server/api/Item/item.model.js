@@ -12,9 +12,25 @@ var mongoose = require('mongoose-bird')(),
       groupHoursUpdateState: Number,
       workStream : Schema.Types.ObjectId,
       userId: Schema.Types.ObjectId
-    }),
+    });
 
-    GROUP_HOURS_BEING_UPDATED = 1;
+function logBeforeAndAfter(before){
+  return function(){
+    before.constructor
+      .findByIdAsync(before._id)
+      .then(function(after){
+        console.log('BEFORE item: ', before);
+        console.log('AFTER item: ', after);
+      });
+  };
+}
+
+function update(item, updates){
+  //use the updateAsync to bypass the pre/post save hooks
+  return item.constructor
+    .updateAsync({_id:item._id}, updates)
+    .then(logBeforeAndAfter(item));
+}
 
 function updateGroupHours(startValue){
   return function(items){
@@ -25,30 +41,14 @@ function updateGroupHours(startValue){
       groupHours += item.hours;
     });
 
-    console.log('updateGroupHours() - items.length: ' + items.length + ' groupHours: ' + groupHours + ' startValue: ' + startValue);
-
     //set the groupHours to all others
     var promises = items.map(function(item){
-      item.groupHours = groupHours;
-
-      //TODO: remove GROUP_HOURS_BEING_UPDATED since it is no longer required
-      item.groupHoursUpdateState = GROUP_HOURS_BEING_UPDATED;
-
-      //use the findByIdAndUpdate to bypass the pre save middleware (http://mongoosejs.com/docs/middleware.html)
-      return item.constructor
-        .findByIdAndUpdate(item._id, item)
-        .execAsync();
-      //return item.saveAsync();
+      return update(item, { groupHours: groupHours });
     });
 
     return Promise.all(promises)
       .then(function(){
-        console.log('updateGroupHours() - all items updated!');
         return groupHours;
-      })
-      .catch(function(error){
-        console.log('updateGroupHours() - error: ', error);
-        throw error;
       });
   };
 }
@@ -56,84 +56,77 @@ function updateGroupHours(startValue){
 function checkNameChanged(newItem){
   return function(old){
 
-    console.log('checkNameChanged() - newItem.name: ' + newItem.name + ' old: ', old);
-    if(!old || old.name === newItem.name){
-      console.log('checkNameChanged() - name did NOT change OR there is no old');
+    if(!old){
+      console.log('checkNameChanged() - it is a new Item');
+    }
+    else if(old.name === newItem.name){
+      console.log('checkNameChanged() - name did NOT change');
       return newItem;
     }
     else{
       console.log('checkNameChanged() - name has changed, we will update items with the old name');
-
       return querySiblings(old)
-        .then(updateGroupHours(0))
-        .then(function(){
-          return newItem;
-        });
+        .then(updateGroupHours(0));
     }
   };
 }
 
 function setGroupHours(source){
   return function(groupHours){
-    console.log('setGroupHours() - groupHours: ' + groupHours + ' source: ', source);
-    source.groupHours = groupHours;
+    var updates = {groupHours : groupHours};
+    return update(source, updates);
   };
 }
 
-//return Siblings with the same name, but different id and not in update mode
+//return Siblings with the same name, workstream and same userId, but different Item id
 function querySiblings(source){
   return source.constructor
-    .find({name:source.name})
+    .find({name:source.name, workStream:source.workStream, userId:source.userId})
     .ne('_id', source._id)
-    .execAsync()
-    .catch(function(error){
-      console.log('querySiblings() - error: ', error);
-      throw error;
-    });
+    .execAsync();
 }
 
 //update the whole group (items with the same name)
-function updateGroup(source, next){
-  return function(){
-    //calculate groupHours
-    querySiblings(source)
-      .then(updateGroupHours(source.hours))
-      .then(setGroupHours(source))
-      .then(next)
-      .catch(function(err){
-        console.log('ERROR: Item pre save: ', err);
-        next(new Error('Could not calculate groupHours'));
-      });
-  };
+function updateGroup(source){
+  //calculate groupHours
+  return querySiblings(source)
+    .then(updateGroupHours(source.hours))
+    .then(setGroupHours(source))
+    .catch(function(err){
+      console.log('ERROR: Could not calculate groupHours - error: ', err);
+      throw new Error('Could not calculate groupHours');
+    });
 }
-
 
 /**
  * Pre-save hook
  */
-ItemSchema
-  .pre('save', function(next) {
+ItemSchema.pre('save', function(next) {
 
-    var item = this;
+  var item = this;
 
-    if (!item.dateTime) {
-      item.dateTime = new Date();
-    }
+  if (!item.dateTime) {
+    item.dateTime = new Date();
+  }
 
-    console.log('pre save -> item: ', item);
+  item.constructor
+    .findByIdAsync(item._id)
+    .then(checkNameChanged(item))
+    .then(next);
+});
 
-    if (item.groupHoursUpdateState === GROUP_HOURS_BEING_UPDATED){
-      console.log('pre save -> item already in update mode ... skiping');
-      //reset the state
-      item.groupHoursUpdateState = 0;
-      next();
-    }
-    else{
-      item.constructor.findByIdAsync(item._id)
-        .then(checkNameChanged(item))
-        .then(updateGroup(item, next));
-    }
 
-  });
+/**
+ * Post save.. calculate group hours
+ */
+ItemSchema.post('save', function(item) {
+  updateGroup(item)
+    .then(logBeforeAndAfter(item));
+});
 
 module.exports = mongoose.model('Item', ItemSchema);
+
+//functions exported for unit testing
+module.exports.__ = {
+  querySiblings:querySiblings
+};

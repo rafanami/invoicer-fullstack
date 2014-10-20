@@ -15,7 +15,8 @@ module.exports = function (grunt) {
     ngtemplates: 'grunt-angular-templates',
     cdnify: 'grunt-google-cdn',
     protractor: 'grunt-protractor-runner',
-    injector: 'grunt-asset-injector'
+    injector: 'grunt-asset-injector',
+    buildcontrol: 'grunt-build-control'
   });
 
   // Time how long tasks take. Can help when optimizing build times
@@ -510,6 +511,26 @@ module.exports = function (grunt) {
         }
       }
     },
+
+    buildcontrol: {
+      options: {
+        dir: 'dist',
+        commit: true,
+        push: true,
+        message: 'Built %sourceName% from commit %sourceCommit% on branch %sourceBranch%'
+      },
+      openshift: {
+        options: {
+          remote: 'ssh://54457502e0b8cd342500040e@invoicer-iswe.rhcloud.com/~/git/invoicer.git',
+          branch: 'master'
+        }
+      }
+    }
+
+  });
+
+  grunt.registerTask('deploy', function () {
+    grunt.task.run(['buildcontrol:openshift']);
   });
 
   // Used for delaying livereload until after server has restarted
@@ -560,6 +581,8 @@ module.exports = function (grunt) {
       'watch'
     ]);
   });
+
+
 
   grunt.registerTask('server', function () {
     grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');

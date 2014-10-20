@@ -525,6 +525,12 @@ module.exports = function (grunt) {
           branch: 'master'
         }
       }
+    },
+
+    shell: {
+        restartApp: {
+            command: 'rhc app-restart -a invoicer'
+        }
     }
 
   });
@@ -532,7 +538,8 @@ module.exports = function (grunt) {
   grunt.registerTask('deploy', function () {
     grunt.task.run([
       'build',
-      'buildcontrol:openshift'
+      'buildcontrol:openshift',
+      'shell:restartApp'
     ]);
   });
 

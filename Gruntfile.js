@@ -530,7 +530,10 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('deploy', function () {
-    grunt.task.run(['buildcontrol:openshift']);
+    grunt.task.run([
+      'build',
+      'buildcontrol:openshift'
+    ]);
   });
 
   // Used for delaying livereload until after server has restarted

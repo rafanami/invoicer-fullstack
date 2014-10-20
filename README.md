@@ -27,6 +27,14 @@ A usefull one is:
 
 Usefull link with console commands: https://developers.openshift.com/en/managing-remote-connection.html
 
+##Setup Google Authentication
+Check what enviroment variable are configured:
+```rhc env list invoicer```
+Add Google parameters:
+```rhc env set GOOGLE_ID=<Google's CLIENT ID> -a <you openshift app name>```
+```rhc env set GOOGLE_SECRET=<Google's CLIENT SECRET> -a <you openshift app name>```
+```rhc env set DOMAIN=<openshift app url> -a <you openshift app name>```
+
 ##Throubleshooting
 
 If you still have issues.. you might need to re-create the app with:

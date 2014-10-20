@@ -5,7 +5,7 @@ var passport = require('passport');
 var config = require('../../config/environment');
 var jwt = require('jsonwebtoken');
 
-var validationError = function(res) {
+var validationError = function(res, code) {
   var statusCode = code || 422;
   return function(err){
     res.json(statusCode, err);

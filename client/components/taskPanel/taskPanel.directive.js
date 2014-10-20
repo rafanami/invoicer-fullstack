@@ -67,18 +67,29 @@ angular.module('invoicerApp')
         function loadTaskFromServer(){
           $log.debug('load current task for user', scope.task.userId);
 
-          $http.get(url + '/findOne?userId=' + scope.task.userId)
-            .success(restoreTaskFromServer)
-            .error(function() {
-              $log.debug('could not find current task for user, will try to recover from localStore');
+          if(scope.task.userId){
+            $http.get(url + '/findOne?userId=' + scope.task.userId)
+              .success(restoreTaskFromServer)
+              .error(function() {
+                $log.debug('could not find current task for user, will try to recover from localStore');
 
-              localStore.load(currentTaskKey())
-                .then(restoreTaskFromLocalStore);
+                localStore.load(currentTaskKey())
+                  .then(restoreTaskFromLocalStore);
 
-            });
+              });
+          }
+          else{
+            $log.info('loadTaskFromServer() -> NO userId !!!');
+          }
         }
 
-        loadTaskFromServer();
+        //check if user is logged in
+        Auth.isLoggedInAsync(function(loggedIn) {
+          if (loggedIn) {
+            scope.task.userId = Auth.getCurrentUser()._id;
+            loadTaskFromServer();
+          }
+        });
 
         scope.task.editTime = function(){
           scope.task.editingTime = true;

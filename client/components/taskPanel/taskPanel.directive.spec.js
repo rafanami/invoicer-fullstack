@@ -18,8 +18,12 @@ describe('Directive: taskPanel', function () {
     localStore = _localStore_;
 
     Auth.getCurrentUser = function(){
-      return {_id:userId};
+      return {_id:userId, role:'tester'};
     }
+
+    Auth.isLoggedInAsync = function(callBack){
+      callBack(true);
+    };
 
     httpBackend.whenGET('/api/workStreams')
       .respond([{_id:100, name:'workStream 01'}]);

@@ -30,6 +30,7 @@ Usefull link with console commands: https://developers.openshift.com/en/managing
 ##Setup Google Authentication
 Check what enviroment variable are configured:
 ```rhc env list invoicer```
+
 Add Google parameters:
 ```rhc env set GOOGLE_ID=<Google's CLIENT ID> -a <you openshift app name>```
 ```rhc env set GOOGLE_SECRET=<Google's CLIENT SECRET> -a <you openshift app name>```
@@ -41,6 +42,18 @@ If you still have issues.. you might need to re-create the app with:
 ```yo angular-fullstack:openshift```
 
 
-## Status:
+## Tasks:
 
-Having issues with the calculation of group hours.
+# Admin
+ -> Page to create a new Workstream
+
+# Task Panel
+ -> Set the current workstream in the dropbox
+
+# Workstream page
+
+ -> Refresh Workstream page after changes (add task, change task)
+
+ -> Display summary of hours at the top
+
+ ->

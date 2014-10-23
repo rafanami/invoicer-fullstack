@@ -15,6 +15,8 @@ var mongoose = require('mongoose-bird')(),
     });
 
 function logBeforeAndAfter(before){
+  return function(){};
+  /*
   return function(){
     before.constructor
       .findByIdAsync(before._id)
@@ -23,6 +25,7 @@ function logBeforeAndAfter(before){
         console.log('AFTER item: ', after);
       });
   };
+  */
 }
 
 function update(item, updates){

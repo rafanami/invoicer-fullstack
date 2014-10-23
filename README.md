@@ -44,9 +44,6 @@ If you still have issues.. you might need to re-create the app with:
 
 ## Tasks:
 
-# Admin
- -> Page to create a new Workstream
-
 # Task Panel
  -> Set the current workstream in the dropbox
 

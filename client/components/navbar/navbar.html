@@ -23,6 +23,8 @@
             <li ng-repeat="subItem in workStreams">
                 <a ng-href="{{subItem.url}}">{{subItem.title}}</a>
             </li>
+            <li role="presentation" class="divider"></li>
+            <li><a ng-click="newWorkstream()">New Workstream</a></li>
           </ul>
         </li>
 

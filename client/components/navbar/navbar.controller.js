@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('invoicerApp')
-  .controller('NavbarCtrl', function ($scope, $location, Auth, $http) {
+  .controller('NavbarCtrl', function ($scope, $location, Auth, $http, $modal, socket) {
 
     $scope.menu = [{
       'title': 'Home',
@@ -17,12 +17,20 @@ angular.module('invoicerApp')
     $scope.isAdmin = Auth.isAdmin;
     $scope.getCurrentUser = Auth.getCurrentUser;
 
-    $http.get('/api/workStreams').success(function(workStreams) {
+    function loadWorkStreams(workStreams) {
       $scope.workStreams = workStreams.map(function(item){
         return {
           url: '/workStream/' + item._id,
           title: item.name
         };
+      });
+    }
+
+    $http.get('/api/workStreams').success(function(list){
+      loadWorkStreams(list);
+
+      socket.syncUpdates('workStream', list, function(event, item, array){
+        loadWorkStreams(array);
       });
     });
 
@@ -34,5 +42,17 @@ angular.module('invoicerApp')
     $scope.isActive = function(route) {
       return route === $location.path();
     };
+
+    $scope.newWorkstream = function(){
+      $modal.open({
+        templateUrl: 'app/newWorkstream/newWorkstream.html',
+        controller: 'NewWorkstreamCtrl',
+        backdrop: 'static'
+      });
+    };
+
+    $scope.$on('$destroy', function () {
+      socket.unsyncUpdates('workStream');
+    });
 
   });

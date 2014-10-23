@@ -51,7 +51,6 @@ angular.module('invoicerApp')
         });
 
       socket.syncUpdates('item', $scope.workStreamCtrl.items);
-      socket.syncUpdates('workStream', $scope.workStreamCtrl.workStream);
     });
 
     $scope.addItem = function() {
@@ -64,7 +63,6 @@ angular.module('invoicerApp')
 
     $scope.$on('$destroy', function () {
       socket.unsyncUpdates('item');
-      socket.unsyncUpdates('workStream');
     });
 
   });

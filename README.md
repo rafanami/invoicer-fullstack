@@ -36,6 +36,23 @@ Add Google parameters:
 ```rhc env set GOOGLE_SECRET=<Google's CLIENT SECRET> -a <you openshift app name>```
 ```rhc env set DOMAIN=<openshift app url> -a <you openshift app name>```
 
+##Setup MongoDB
+If you're using Mac OSX, just need to do
+```brew install mongo```
+
+After the installation, you might need to define a data folder, and start mongodb like this:
+```mkdir <path to the data folder>```
+```mongod --dbpath=<path to the data folder>```
+
+Open another terminal, to create the database of the application
+```mongo```
+```use invoicer-dev```
+
+##Initial Setup
+Run ```npm install --save-dev``` to create all the node dependencies.
+After this, run ```bower install --save-dev``` to create all UI dependencies.
+And lastly, run ```grunt serve``` to start the server.
+
 ##Throubleshooting
 
 If you still have issues.. you might need to re-create the app with:
